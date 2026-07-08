@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#141e2b">
+    <meta name="theme-color" content="#0a0e14">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <title>Дом Уровень • Чат</title>
+    <title>Роблоксия • Городской чат</title>
     <style>
         * {
             margin: 0;
@@ -35,6 +33,1094 @@
             height: 100vh;
             max-height: 900px;
             background: #f0f3f8;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        /* Регистрация */
+        .register-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0e14 0%, #1a2230 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 30px;
+            gap: 16px;
+            animation: fadeIn 0.5s ease;
+        }
+        .register-overlay.hidden { display: none; }
+
+        .register-logo {
+            font-size: 64px;
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(231, 76, 139, 0.3);
+            margin-bottom: 10px;
+        }
+        .register-title {
+            color: white;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .register-title span {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .register-sub {
+            color: #8a9bb5;
+            font-size: 16px;
+            text-align: center;
+        }
+        .register-input {
+            width: 100%;
+            max-width: 320px;
+            padding: 18px 24px;
+            border: 2px solid #e74c8b;
+            border-radius: 30px;
+            font-size: 18px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            outline: none;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .register-input:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 0 4px rgba(231, 76, 139, 0.2);
+            background: rgba(255,255,255,0.1);
+        }
+        .register-input::placeholder { color: #5a6a82; }
+        .register-btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 18px;
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 8px 30px rgba(231, 76, 139, 0.3);
+        }
+        .register-btn:active { transform: scale(0.96); }
+        .register-error {
+            color: #ff6b6b;
+            font-size: 14px;
+            display: none;
+        }
+        .register-error.visible { display: block; }
+
+        /* Шапка */
+        .chat-header {
+            background: #0a0e14;
+            padding: 10px 14px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 3px solid #e74c8b;
+            flex-shrink: 0;
+            padding-top: 44px;
+        }
+        .header-icon {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            width: 40px;
+            height: 40px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .header-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            flex: 1;
+        }
+        .header-title {
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.3px;
+        }
+        .header-title span {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-sub {
+            font-size: 11px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-user {
+            font-size: 12px;
+            color: #e74c8b;
+            font-weight: 600;
+            background: rgba(255,255,255,0.08);
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(231, 76, 139, 0.2);
+            white-space: nowrap;
+        }
+
+        /* Навигация по каналам */
+        .channel-nav {
+            background: #141c28;
+            padding: 8px 12px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            flex-shrink: 0;
+            border-bottom: 1px solid #2a3a4a;
+            -webkit-overflow-scrolling: touch;
+        }
+        .channel-nav::-webkit-scrollbar { display: none; }
+        .channel-btn {
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid #2a3a4a;
+            background: transparent;
+            color: #8a9bb5;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .channel-btn.active {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            color: white;
+            border-color: #e74c8b;
+        }
+        .channel-btn:active { transform: scale(0.95); }
+
+        /* Сообщения */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px 4px 12px;
+            background: #eef1f6;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 88%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            animation: fadeInUp 0.2s ease;
+            position: relative;
+        }
+        .message-in {
+            align-self: flex-start;
+            background: #ffffff;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e8edf4;
+        }
+        .message-out {
+            align-self: flex-end;
+            background: #0a0e14;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message-out .msg-time { color: #8a9bb5; }
+        .message-out .msg-author { color: #e74c8b; }
+        .msg-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            gap: 8px;
+        }
+        .msg-author {
+            font-weight: 600;
+            font-size: 12px;
+            color: #e74c8b;
+        }
+        .message-in .msg-author { color: #0a0e14; }
+        .msg-time {
+            font-size: 10px;
+            opacity: 0.6;
+            color: #6a7a92;
+        }
+        .msg-text { margin-bottom: 2px; word-break: break-word; }
+        .msg-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            display: block;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .msg-audio {
+            width: 180px;
+            height: 36px;
+            border-radius: 20px;
+            margin-bottom: 2px;
+        }
+        .msg-reply {
+            font-size: 12px;
+            opacity: 0.7;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin-bottom: 4px;
+            border-left: 3px solid #e74c8b;
+        }
+        .message-out .msg-reply { background: rgba(255,255,255,0.08); }
+        .msg-badge {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 30px;
+            background: rgba(231, 76, 139, 0.15);
+            color: #e74c8b;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        .system-message {
+            align-self: center;
+            background: rgba(10, 14, 20, 0.06);
+            color: #3a4a5e;
+            font-size: 12px;
+            padding: 5px 16px;
+            border-radius: 30px;
+            max-width: 92%;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.04);
+            font-weight: 500;
+        }
+        .system-message strong { color: #e74c8b; }
+        .system-message .city-tag {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            color: white;
+            padding: 1px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* Ввод */
+        .chat-footer {
+            background: #ffffff;
+            padding: 8px 12px 12px 12px;
+            border-top: 1px solid #e8edf4;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .footer-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #dce3ed;
+            border-radius: 30px;
+            font-size: 15px;
+            outline: none;
+            background: #f8faff;
+            transition: 0.2s;
+            min-width: 80px;
+        }
+        .footer-input:focus {
+            border-color: #e74c8b;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(231, 76, 139, 0.12);
+        }
+        .btn {
+            background: #0a0e14;
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #2a3a4a;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn:active { transform: scale(0.94); }
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c8b, #8e44ad);
+            color: white;
+            border-color: #e74c8b;
+        }
+        .btn-icon {
+            background: rgba(10, 14, 20, 0.06);
+            color: #0a0e14;
+            border-color: #dce3ed;
+            padding: 10px 12px;
+            font-size: 16px;
+        }
+        .btn-record {
+            background: #dc3545;
+            border-color: #dc3545;
+            padding: 10px 12px;
+            font-size: 16px;
+            animation: pulse 1.5s infinite;
+        }
+        .btn-record.recording {
+            background: #ff6b6b;
+            animation: pulse 0.6s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: #e8edf4; border-radius: 10px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #e74c8b; border-radius: 10px; }
+
+        .hidden-input { display: none; }
+
+        /* Городской статус */
+        .city-status {
+            padding: 6px 12px;
+            background: #141c28;
+            color: #8a9bb5;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            border-bottom: 1px solid #2a3a4a;
+        }
+        .city-status .online-count {
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .city-status .online-count::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            padding: 4px 12px;
+            background: #f8faff;
+            border-top: 1px solid #e8edf4;
+            flex-shrink: 0;
+        }
+        .toolbar-btn {
+            background: none;
+            border: none;
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #4a5a6e;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .toolbar-btn:active { background: rgba(0,0,0,0.06); }
+
+        .emoji-picker {
+            display: none;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px;
+            background: white;
+            border-top: 1px solid #e8edf4;
+            flex-shrink: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .emoji-picker.show { display: flex; }
+        .emoji-picker span {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: 0.15s;
+        }
+        .emoji-picker span:active { background: #e8edf4; transform: scale(1.2); }
+
+        .typing-status {
+            font-size: 12px;
+            color: #6a7a92;
+            padding: 2px 12px;
+            display: none;
+            font-style: italic;
+            background: #f8faff;
+        }
+
+        @media (max-width: 480px) {
+            .app-container { max-height: 100vh; border-radius: 0; }
+            .btn { padding: 8px 10px; font-size: 12px; }
+            .header-title { font-size: 16px; }
+            .register-title { font-size: 24px; }
+        }
+        @media (min-width: 481px) {
+            body { padding: 20px; }
+            .app-container {
+                border-radius: 28px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+                height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Регистрация -->
+    <div class="register-overlay" id="registerOverlay">
+        <div class="register-logo">🏙️</div>
+        <div class="register-title">Город <span>Роблоксия</span></div>
+        <div class="register-sub">Войдите в городской чат</div>
+        <input type="text" class="register-input" id="registerInput" placeholder="Ваше имя" maxlength="20" autofocus>
+        <div class="register-error" id="registerError">Имя не может быть пустым</div>
+        <button class="register-btn" id="registerBtn">Войти в город</button>
+    </div>
+
+    <!-- Шапка -->
+    <div class="chat-header">
+        <div class="header-icon">🏙️</div>
+        <div class="header-text">
+            <div class="header-title">Город <span>Роблоксия</span></div>
+            <div class="header-sub">
+                <span id="currentChannel">🏠 Общий</span>
+            </div>
+        </div>
+        <div class="header-user" id="currentUser">Гость</div>
+    </div>
+
+    <!-- Городской статус -->
+    <div class="city-status">
+        <span id="cityStatus">🌆 Роблоксия живёт</span>
+        <span class="online-count" id="onlineCount">0 онлайн</span>
+    </div>
+
+    <!-- Навигация по каналам -->
+    <div class="channel-nav" id="channelNav">
+        <button class="channel-btn active" data-channel="general">🏠 Общий</button>
+        <button class="channel-btn" data-channel="news">📰 Новости</button>
+        <button class="channel-btn" data-channel="services">🔧 Услуги</button>
+        <button class="channel-btn" data-channel="market">🛒 Рынок</button>
+        <button class="channel-btn" data-channel="events">🎉 События</button>
+        <button class="channel-btn" data-channel="help">🆘 Помощь</button>
+        <button class="channel-btn" data-channel="offtopic">💬 Оффтоп</button>
+        <button class="channel-btn" data-channel="admin">⚡ Администрация</button>
+    </div>
+
+    <!-- Сообщения -->
+    <div class="chat-messages" id="chatMessages">
+        <div class="system-message">
+            <span class="city-tag">РОБЛОКСИЯ</span> — <strong>Общий чат города</strong>
+        </div>
+        <div class="system-message">🏙️ Добро пожаловать в Роблоксия</div>
+    </div>
+
+    <!-- Статус печатает -->
+    <div class="typing-status" id="typingStatus"></div>
+
+    <!-- Панель инструментов -->
+    <div class="toolbar">
+        <button class="toolbar-btn" onclick="document.getElementById('fileInput').click()">📷 Фото</button>
+        <button class="toolbar-btn" onclick="toggleRecording()">🎤 Голос</button>
+        <button class="toolbar-btn" onclick="toggleEmojiPicker()">😊 Эмодзи</button>
+        <button class="toolbar-btn" onclick="createPoll()">📊 Опрос</button>
+        <button class="toolbar-btn" onclick="sendLocation()">📍 Гео</button>
+        <button class="toolbar-btn" onclick="sendContact()">📇 Контакт</button>
+        <button class="toolbar-btn" onclick="toggleTheme()">🌙 Тема</button>
+        <button class="toolbar-btn" onclick="clearChat()">🗑 Очистить</button>
+    </div>
+
+    <!-- Эмодзи пикер -->
+    <div class="emoji-picker" id="emojiPicker">
+        <span onclick="addEmoji('😊')">😊</span><span onclick="addEmoji('😂')">😂</span>
+        <span onclick="addEmoji('❤️')">❤️</span><span onclick="addEmoji('🔥')">🔥</span>
+        <span onclick="addEmoji('👍')">👍</span><span onclick="addEmoji('👎')">👎</span>
+        <span onclick="addEmoji('🙏')">🙏</span><span onclick="addEmoji('💪')">💪</span>
+        <span onclick="addEmoji('🎉')">🎉</span><span onclick="addEmoji('😎')">😎</span>
+        <span onclick="addEmoji('🤔')">🤔</span><span onclick="addEmoji('🤦')">🤦</span>
+        <span onclick="addEmoji('👀')">👀</span><span onclick="addEmoji('💀')">💀</span>
+        <span onclick="addEmoji('✨')">✨</span><span onclick="addEmoji('🌟')">🌟</span>
+        <span onclick="addEmoji('🌙')">🌙</span><span onclick="addEmoji('☀️')">☀️</span>
+        <span onclick="addEmoji('⚡')">⚡</span><span onclick="addEmoji('💡')">💡</span>
+        <span onclick="addEmoji('🔑')">🔑</span><span onclick="addEmoji('🔒')">🔒</span>
+        <span onclick="addEmoji('📱')">📱</span><span onclick="addEmoji('💻')">💻</span>
+        <span onclick="addEmoji('🏠')">🏠</span><span onclick="addEmoji('🏢')">🏢</span>
+        <span onclick="addEmoji('🏪')">🏪</span><span onclick="addEmoji('🏫')">🏫</span>
+        <span onclick="addEmoji('🚗')">🚗</span><span onclick="addEmoji('🚕')">🚕</span>
+        <span onclick="addEmoji('🚌')">🚌</span><span onclick="addEmoji('🚀')">🚀</span>
+        <span onclick="addEmoji('🌈')">🌈</span><span onclick="addEmoji('🌊')">🌊</span>
+        <span onclick="addEmoji('🎮')">🎮</span><span onclick="addEmoji('🕹️')">🕹️</span>
+        <span onclick="addEmoji('👾')">👾</span><span onclick="addEmoji('🤖')">🤖</span>
+    </div>
+
+    <!-- Футер -->
+    <div class="chat-footer">
+        <input type="text" class="footer-input" id="messageInput" placeholder="Написать в Роблоксия..." />
+        <button class="btn btn-primary" id="sendBtn">Отправить</button>
+        <input type="file" class="hidden-input" id="fileInput" accept="image/*" capture="environment">
+        <button class="btn btn-record" id="audioBtn">🎤</button>
+        <button class="btn btn-icon" id="replyBtn" style="display:none;">↩</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getDatabase, ref, push, onChildAdded, query, limitToLast, 
+        set, onValue, remove, update, get, child 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { 
+        getStorage, ref as storageRef, uploadBytes, getDownloadURL 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBGQsFeeyYbNMjT_pvLSrukC_In2mwzoY4",
+        authDomain: "chaturoven.firebaseapp.com",
+        projectId: "chaturoven",
+        storageBucket: "chaturoven.firebasestorage.app",
+        messagingSenderId: "756824112892",
+        appId: "1:756824112892:web:094cbe71a4d420fa502179"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+    let currentChannel = 'general';
+    let currentUserName = '';
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let lastMessageId = null;
+    let replyToMessage = null;
+    let isDarkTheme = false;
+
+    // DOM
+    const registerOverlay = document.getElementById('registerOverlay');
+    const registerInput = document.getElementById('registerInput');
+    const registerBtn = document.getElementById('registerBtn');
+    const registerError = document.getElementById('registerError');
+    const currentUserDisplay = document.getElementById('currentUser');
+    const messagesContainer = document.getElementById('chatMessages');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fileInput = document.getElementById('fileInput');
+    const audioBtn = document.getElementById('audioBtn');
+    const onlineCount = document.getElementById('onlineCount');
+    const typingStatus = document.getElementById('typingStatus');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const replyBtn = document.getElementById('replyBtn');
+    const currentChannelDisplay = document.getElementById('currentChannel');
+
+    const channelNames = {
+        'general': '🏠 Общий',
+        'news': '📰 Новости',
+        'services': '🔧 Услуги',
+        'market': '🛒 Рынок',
+        'events': '🎉 События',
+        'help': '🆘 Помощь',
+        'offtopic': '💬 Оффтоп',
+        'admin': '⚡ Администрация'
+    };
+
+    // Загрузка сохранённого пользователя
+    function loadSavedUser() {
+        const saved = localStorage.getItem('rob_loxia_username');
+        if (saved && saved.trim()) return saved.trim();
+        return null;
+    }
+
+    // Вход
+    function loginUser(name) {
+        currentUserName = name;
+        localStorage.setItem('rob_loxia_username', name);
+        localStorage.setItem('rob_loxia_user_id', Date.now().toString());
+        currentUserDisplay.textContent = name;
+        registerOverlay.classList.add('hidden');
+        input.focus();
+        addSystemMessage(name + ' вошёл в Роблоксия');
+        updateOnlineStatus(true);
+        loadMessages();
+        updateOnlineCount();
+        watchTyping();
+    }
+
+    function updateOnlineStatus(online) {
+        const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+        set(ref(db, 'users/' + userId), {
+            name: currentUserName || 'Гость',
+            online: online,
+            lastSeen: Date.now(),
+            city: 'Роблоксия'
+        });
+    }
+
+    function updateOnlineCount() {
+        const usersRef = ref(db, 'users');
+        onValue(usersRef, (snapshot) => {
+            let count = 0;
+            snapshot.forEach((child) => {
+                const data = child.val();
+                if (data.online && (Date.now() - data.lastSeen < 60000)) {
+                    count++;
+                }
+            });
+            onlineCount.textContent = count + ' онлайн';
+        });
+    }
+
+    function watchTyping() {
+        const typingRef = ref(db, 'typing');
+        onValue(typingRef, (snapshot) => {
+            let typingUsers = [];
+            snapshot.forEach((child) => {
+                const data = child.val();
+                if (data.typing && (Date.now() - data.timestamp < 3000) && data.name !== currentUserName) {
+                    typingUsers.push(data.name);
+                }
+            });
+            if (typingUsers.length > 0) {
+                typingStatus.textContent = typingUsers.join(', ') + ' печатает...';
+                typingStatus.style.display = 'block';
+            } else {
+                typingStatus.style.display = 'none';
+            }
+        });
+    }
+
+    function setTypingStatus(typing) {
+        const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+        set(ref(db, 'typing/' + userId), {
+            name: currentUserName || 'Гость',
+            typing: typing,
+            timestamp: Date.now()
+        });
+    }
+
+    function loadMessages() {
+        const messagesRef = ref(db, 'messages/' + currentChannel);
+        const recentQuery = query(messagesRef, limitToLast(100));
+        onChildAdded(recentQuery, (snapshot) => {
+            const data = snapshot.val();
+            if (data.id !== lastMessageId) {
+                addMessageToDOM(data);
+                lastMessageId = data.id;
+                scrollToBottom();
+                playNotificationSound();
+            }
+        });
+    }
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text && !replyToMessage) return;
+
+        const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+        const messagesRef = ref(db, 'messages/' + currentChannel);
+        const messageData = {
+            id: Date.now().toString(),
+            author: currentUserName || 'Гость',
+            text: text || '[вложение]',
+            timestamp: Date.now(),
+            userId: userId,
+            replyTo: replyToMessage || null,
+            channel: currentChannel
+        };
+
+        push(messagesRef, messageData);
+        input.value = '';
+        replyToMessage = null;
+        replyBtn.style.display = 'none';
+        setTypingStatus(false);
+        input.focus();
+    }
+
+    function addMessageToDOM(data) {
+        const msgDiv = document.createElement('div');
+        const isOutgoing = data.userId === localStorage.getItem('rob_loxia_user_id');
+        msgDiv.className = `message ${isOutgoing ? 'message-out' : 'message-in'}`;
+        msgDiv.dataset.id = data.id;
+
+        const time = new Date(data.timestamp);
+        const timeStr = time.getHours().toString().padStart(2, '0') + ':' + 
+                        time.getMinutes().toString().padStart(2, '0');
+
+        let content = '';
+        if (data.image) {
+            content = `<img src="${data.image}" class="msg-image" alt="фото" onclick="window.open('${data.image}','_blank')" />`;
+        } else if (data.audio) {
+            content = `<audio controls class="msg-audio" src="${data.audio}"></audio>`;
+        } else {
+            content = `<div class="msg-text">${escapeHtml(data.text)}</div>`;
+        }
+
+        let replyHtml = '';
+        if (data.replyTo) {
+            replyHtml = `<div class="msg-reply">↳ ${escapeHtml(data.replyTo)}</div>`;
+        }
+
+        msgDiv.innerHTML = `
+            ${replyHtml}
+            ${content}
+            <div class="msg-meta">
+                <span class="msg-author">${escapeHtml(data.author)}</span>
+                <span class="msg-time">${timeStr}</span>
+            </div>
+        `;
+
+        messagesContainer.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+        setTimeout(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 100);
+    }
+
+    function addSystemMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'system-message';
+        msgDiv.innerHTML = '<strong>РОБЛОКСИЯ</strong> — ' + text;
+        messagesContainer.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    // Переключение каналов
+    function switchChannel(channel) {
+        currentChannel = channel;
+        currentChannelDisplay.textContent = channelNames[channel] || '🏠 Общий';
+        messagesContainer.innerHTML = '';
+        addSystemMessage('Переход в канал ' + channelNames[channel]);
+        document.querySelectorAll('.channel-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.channel === channel);
+        });
+        lastMessageId = null;
+        loadMessages();
+    }
+
+    // Фото
+    async function sendImage(file) {
+        const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+        const storagePath = storageRef(storage, 'images/' + Date.now() + '_' + file.name);
+        try {
+            const snapshot = await uploadBytes(storagePath, file);
+            const url = await getDownloadURL(snapshot.ref);
+            const messagesRef = ref(db, 'messages/' + currentChannel);
+            const messageData = {
+                id: Date.now().toString(),
+                author: currentUserName || 'Гость',
+                image: url,
+                timestamp: Date.now(),
+                userId: userId,
+                channel: currentChannel
+            };
+            push(messagesRef, messageData);
+        } catch (error) {
+            alert('Не удалось загрузить фото');
+        }
+    }
+
+    // Аудио
+    async function sendAudio(blob) {
+        const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+        const storagePath = storageRef(storage, 'audio/' + Date.now() + '.wav');
+        try {
+            const snapshot = await uploadBytes(storagePath, blob);
+            const url = await getDownloadURL(snapshot.ref);
+            const messagesRef = ref(db, 'messages/' + currentChannel);
+            const messageData = {
+                id: Date.now().toString(),
+                author: currentUserName || 'Гость',
+                audio: url,
+                timestamp: Date.now(),
+                userId: userId,
+                channel: currentChannel
+            };
+            push(messagesRef, messageData);
+        } catch (error) {
+            alert('Не удалось загрузить аудио');
+        }
+    }
+
+    // Запись
+    function toggleRecording() {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    }
+
+    function startRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Ваш браузер не поддерживает запись аудио');
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    sendAudio(audioBlob);
+                    audioBtn.classList.remove('recording');
+                    audioBtn.textContent = '🎤';
+                    isRecording = false;
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                audioBtn.classList.add('recording');
+                audioBtn.textContent = '⏹';
+            })
+            .catch(() => alert('Нет доступа к микрофону'));
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    // Остальные функции
+    window.toggleEmojiPicker = function() {
+        emojiPicker.classList.toggle('show');
+    };
+
+    window.addEmoji = function(emoji) {
+        input.value += emoji;
+        input.focus();
+        emojiPicker.classList.remove('show');
+    };
+
+    window.createPoll = function() {
+        const question = prompt('Вопрос для голосования:');
+        if (!question) return;
+        const options = prompt('Варианты через запятую:');
+        if (!options) return;
+        const opts = options.split(',').map(o => o.trim());
+        let html = `<div style="background:white;padding:12px;border-radius:12px;border:1px solid #e8edf4;"><p><strong>📊 ${question}</strong></p>`;
+        opts.forEach((opt, i) => {
+            html += `<button onclick="votePoll(${i})" style="margin:4px;padding:8px 16px;border:1px solid #e74c8b;border-radius:20px;background:none;cursor:pointer;">${opt}</button> `;
+        });
+        html += `</div>`;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message message-in';
+        msgDiv.innerHTML = html;
+        messagesContainer.appendChild(msgDiv);
+        scrollToBottom();
+    };
+
+    window.votePoll = function(index) {
+        addSystemMessage('Голос принят');
+    };
+
+    window.sendLocation = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const url = `https://maps.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+                const messagesRef = ref(db, 'messages/' + currentChannel);
+                push(messagesRef, {
+                    id: Date.now().toString(),
+                    author: currentUserName || 'Гость',
+                    text: '📍 Моё местоположение: ' + url,
+                    timestamp: Date.now(),
+                    userId: userId,
+                    channel: currentChannel
+                });
+            }, () => alert('Не удалось определить геолокацию'));
+        } else {
+            alert('Геолокация не поддерживается');
+        }
+    };
+
+    window.sendContact = function() {
+        const name = prompt('Имя контакта:');
+        const phone = prompt('Телефон:');
+        if (name && phone) {
+            const userId = localStorage.getItem('rob_loxia_user_id') || 'guest';
+            const messagesRef = ref(db, 'messages/' + currentChannel);
+            push(messagesRef, {
+                id: Date.now().toString(),
+                author: currentUserName || 'Гость',
+                text: `📇 Контакт: ${name}, тел: ${phone}`,
+                timestamp: Date.now(),
+                userId: userId,
+                channel: currentChannel
+            });
+        }
+    };
+
+    window.clearChat = function() {
+        if (confirm('Очистить весь чат в этом канале?')) {
+            const messagesRef = ref(db, 'messages/' + currentChannel);
+            set(messagesRef, null);
+            messagesContainer.innerHTML = '';
+            addSystemMessage('Чат очищен');
+        }
+    };
+
+    window.toggleTheme = function() {
+        isDarkTheme = !isDarkTheme;
+        if (isDarkTheme) {
+            document.body.style.background = '#0a0e14';
+            document.querySelector('.app-container').style.background = '#1a1f2b';
+            document.querySelector('.chat-messages').style.background = '#151a24';
+            document.querySelectorAll('.message-in').forEach(el => {
+                el.style.background = '#2a3245';
+                el.style.color = 'white';
+                el.style.borderColor = '#3c4b5e';
+            });
+            document.querySelector('.chat-footer').style.background = '#0a0e14';
+            document.querySelector('.footer-input').style.background = '#1a1f2b';
+            document.querySelector('.footer-input').style.color = 'white';
+            document.querySelector('.footer-input').style.borderColor = '#3c4b5e';
+            document.querySelector('.toolbar').style.background = '#0a0e14';
+            document.querySelectorAll('.toolbar-btn').forEach(el => el.style.color = '#8a9bb5');
+        } else {
+            document.body.style.background = '#0a0e14';
+            document.querySelector('.app-container').style.background = '#f0f3f8';
+            document.querySelector('.chat-messages').style.background = '#eef1f6';
+            document.querySelectorAll('.message-in').forEach(el => {
+                el.style.background = '#ffffff';
+                el.style.color = '#0a0e14';
+                el.style.borderColor = '#e8edf4';
+            });
+            document.querySelector('.chat-footer').style.background = '#ffffff';
+            document.querySelector('.footer-input').style.background = '#f8faff';
+            document.querySelector('.footer-input').style.color = '#0a0e14';
+            document.querySelector('.footer-input').style.borderColor = '#dce3ed';
+            document.querySelector('.toolbar').style.background = '#f8faff';
+            document.querySelectorAll('.toolbar-btn').forEach(el => el.style.color = '#4a5a6e');
+        }
+    };
+
+    function playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqFhYR8g4eMk4iIf4ODg4OFhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoeIiIaHhoaHiIiG');
+            audio.play().catch(() => {});
+        } catch(e) {}
+    }
+
+    // События
+    registerBtn.addEventListener('click', () => {
+        const name = registerInput.value.trim();
+        if (!name) {
+            registerError.classList.add('visible');
+            return;
+        }
+        registerError.classList.remove('visible');
+        loginUser(name);
+    });
+
+    registerInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            registerBtn.click();
+        }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+        setTypingStatus(true);
+        clearTimeout(input._typingTimeout);
+        input._typingTimeout = setTimeout(() => setTypingStatus(false), 2000);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            sendImage(e.target.files[0]);
+            fileInput.value = '';
+        }
+    });
+
+    audioBtn.addEventListener('click', toggleRecording);
+
+    // Каналы
+    document.querySelectorAll('.channel-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchChannel(btn.dataset.channel);
+        });
+    });
+
+    replyBtn.addEventListener('click', () => {
+        replyToMessage = null;
+        replyBtn.style.display = 'none';
+    });
+
+    // Загрузка
+    const savedName = loadSavedUser();
+    if (savedName) {
+        loginUser(savedName);
+    } else {
+        registerOverlay.classList.remove('hidden');
+        registerInput.focus();
+    }
+
+    window.addEventListener('beforeunload', () => {
+        updateOnlineStatus(false);
+    });
+</script>
+</body>
+</html>            background: #f0f3f8;
             display: flex;
             flex-direction: column;
             overflow: hidden;
